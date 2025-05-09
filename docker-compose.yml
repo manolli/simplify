@@ -1,0 +1,36 @@
+#version: "3.9"
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    ports: ["27017:27017"]
+    volumes: ["mongo_data:/data/db"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth:
+    build: ./core/auth      # usará o Dockerfile genérico
+    env_file: ./core/auth/.env
+    depends_on: [mongo]
+    ports: ["4000:4000"]
+
+  barbershop-agenda:
+    build:
+      context: .
+      dockerfile: verticals/barbershop/Dockerfile
+    env_file: ./verticals/barbershop/.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      auth:
+        condition: service_started
+    ports: ["4100:4100"]
+
+
+
+volumes:
+  mongo_data:

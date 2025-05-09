@@ -1,0 +1,43 @@
+############################
+# -------- BUILD ----------
+############################
+FROM node:20-alpine AS build
+WORKDIR /app
+
+# 1️⃣  Copie o lockfile da raiz  (context é .)
+COPY pnpm-lock.yaml ./
+
+# 2️⃣  Copie apenas os arquivos do serviço
+COPY verticals/barbershop/package.json ./package.json
+COPY verticals/barbershop/tsconfig.json ./tsconfig.json
+COPY verticals/barbershop/src ./src
+
+# Instala TODAS as dependências (dev + prod)
+RUN corepack enable \
+ && pnpm install --no-frozen-lockfile
+
+# Compila TypeScript
+RUN pnpm run build
+
+############################
+# -------- RUNTIME --------
+############################
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=4100
+
+# Copia JS compilado + package.json + lock
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# Instala somente prod‑deps
+RUN corepack enable \
+ && pnpm install --prod --frozen-lockfile
+
+EXPOSE 4100
+HEALTHCHECK --interval=30s --retries=3 CMD \
+  wget -qO- http://localhost:4100/v1/health || exit 1
+
+CMD ["node", "dist/server.js"]
