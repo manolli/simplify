@@ -143,6 +143,6 @@ JWT_SECRET=supersecretdev
 
 ## 👨‍💻 Autor
 
-Desenvolvido por [@manolli](https://github.com/SEU_USUARIO_AQUI), com o propósito de entregar soluções SaaS acessíveis e específicas para mercados locais e nichados.
+Desenvolvido por [@manolli](https://github.com/manolli), com o propósito de entregar soluções SaaS acessíveis e específicas para mercados locais e nichados.
 
 ---
