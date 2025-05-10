@@ -1,4 +1,7 @@
 packages:
-  - "core/*"
-  - "verticals/*"
-  - "frontend"
+  - 'core/*'
+  - 'verticals/*'
+  - 'frontend'
+onlyBuiltDependencies:
+  - esbuild
+  - vue-demi
