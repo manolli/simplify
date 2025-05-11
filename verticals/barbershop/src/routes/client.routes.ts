@@ -2,12 +2,20 @@ import { Router } from 'express';
 import { protect } from '../middleware/authJWT';
 import {
   createClient,
-  listClients
+  getAllClients,
+  getClientById,
+  updateClient,
+  deleteClient
 } from '../controllers/client.controller';
 
 const router = Router();
 
-router.post('/', protect, createClient);    // POST /v1/clients
-router.get('/', protect, listClients);      // GET  /v1/clients
+router.use(protect)
+
+router.post('/', createClient)
+router.get('/', getAllClients)
+router.get('/:id', getClientById)
+router.put('/:id', updateClient)
+router.delete('/:id', deleteClient)
 
 export default router;

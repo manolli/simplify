@@ -19,7 +19,7 @@
     <nav class="flex-1">
       <ul class="space-y-1">
         <SidebarLink icon="📊" label="Dashboard" to="/dashboard" :collapsed="isCollapsed" />
-        <SidebarLink icon="👥" label="Clientes" to="/clientes" :collapsed="isCollapsed" />
+        <SidebarLink icon="👥" label="Clientes" to="/clients" :collapsed="isCollapsed" />
         <SidebarLink icon="✂️" label="Serviços" to="/servicos" :collapsed="isCollapsed" />
         <SidebarLink icon="💸" label="Financeiro" to="/financeiro" :collapsed="isCollapsed" />
         <SidebarLink icon="📈" label="Relatórios" to="/relatorios" :collapsed="isCollapsed" />
