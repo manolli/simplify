@@ -26,7 +26,7 @@ services:
     build:
       context: .
       dockerfile: verticals/barbershop/Dockerfile
-    env_file: ./verticals/barbershop/.env
+    env_file: ./verticals/barbershop/.env.docker
     depends_on:
       mongo:
         condition: service_healthy
