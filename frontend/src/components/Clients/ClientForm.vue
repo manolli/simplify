@@ -63,42 +63,49 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { reactive, watch } from 'vue'
 import { useClientStore, type Client } from '@/store/client'
 
 const props = defineProps<{ client: Client | null }>()
 const emit = defineEmits(['close', 'saved'])
 
-const model = ref<Client>({
+const store = useClientStore()
+
+// Torna o formulário reativo com valores padrão
+const model = reactive<Client>({
   name: '',
   phone: '',
   email: '',
   notes: ''
 })
 
+// Atualiza os campos quando um cliente é passado como prop
 watch(
   () => props.client,
   (newVal) => {
-    model.value = newVal
-      ? { ...newVal }
-      : { name: '', phone: '', email: '', notes: '' }
+    if (newVal) {
+      Object.assign(model, newVal)
+    } else {
+      model.name = ''
+      model.phone = ''
+      model.email = ''
+      model.notes = ''
+    }
   },
   { immediate: true }
 )
 
-const store = useClientStore()
-
 const submit = async () => {
   try {
-    if (model.value._id) {
-      await store.updateClient(model.value._id, model.value)
+    if (props.client?._id) {
+      await store.updateClient(props.client._id, model)
     } else {
-      await store.createClient(model.value)
+      await store.createClient(model)
     }
 
-    emit('saved')
+    emit('saved') // notifica o componente pai para recarregar e fechar
   } catch (error: any) {
-    alert(error.message) // ou use um toast
+    alert(error.message)
     console.error('Erro ao salvar cliente:', error)
   }
 }

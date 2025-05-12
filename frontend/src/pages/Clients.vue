@@ -54,20 +54,20 @@
     />
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { type Client } from '@/store/client'
 import { useClientStore } from '@/store/client'
+import { storeToRefs } from 'pinia'
 import ClientForm from '@/components/Clients/ClientForm.vue'
 
 const store = useClientStore()
-const { clients, loading, fetchClients, deleteClient } = store
+const { clients, loading } = storeToRefs(store)
+const { fetchClients, deleteClient } = store
 
 const formOpen = ref(false)
-const selected = ref<Client | null>(null)
+const selected = ref(null)
 
-const openForm = (client: Client | null = null) => {
+const openForm = (client = null) => {
   selected.value = client
   formOpen.value = true
 }
@@ -77,12 +77,11 @@ const closeForm = () => {
   formOpen.value = false
 }
 
-const onSave = async () => {
-  await fetchClients()
+const onSave = async () => {  
   closeForm()
 }
 
-const remove = async (id: string) => {
+const remove = async (id) => {
   if (confirm('Deseja realmente excluir este cliente?')) {
     await deleteClient(id)
   }

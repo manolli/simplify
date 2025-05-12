@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/services/api'
 
 export interface Client {
   _id?: string
@@ -22,7 +22,7 @@ export const useClientStore = defineStore('client', {
       this.loading = true
       this.error = null
       try {
-        const res = await axios.get('/v1/clients')
+        const res = await api.get('/clients')
         this.clients = res.data
       } catch (err: any) {
         this.error = err.response?.data?.error || 'Erro ao buscar clientes'
@@ -32,30 +32,41 @@ export const useClientStore = defineStore('client', {
     },
 
     async createClient(client: Client) {
+      this.loading = true
       try {
-        const res = await axios.post('/v1/clients', client)
-        this.clients.push(res.data)
+        const res = await api.post('/clients', client)
+        this.clients.push(res.data) // Adiciona o cliente diretamente à lista
       } catch (err: any) {
         throw new Error(err.response?.data?.error || 'Erro ao criar cliente')
+      } finally {
+        this.loading = false
       }
     },
 
     async updateClient(id: string, client: Client) {
+      this.loading = true
       try {
-        const res = await axios.put(`/v1/clients/${id}`, client)
+        const res = await api.put(`/clients/${id}`, client)
         const index = this.clients.findIndex(c => c._id === id)
-        if (index !== -1) this.clients[index] = res.data
+        if (index !== -1) {
+          this.clients[index] = res.data // Atualiza o cliente na lista
+        }
       } catch (err: any) {
         throw new Error(err.response?.data?.error || 'Erro ao atualizar cliente')
+      } finally {
+        this.loading = false
       }
     },
 
     async deleteClient(id: string) {
+      this.loading = true
       try {
-        await axios.delete(`/v1/clients/${id}`)
-        this.clients = this.clients.filter(c => c._id !== id)
+        await api.delete(`/clients/${id}`)
+        this.clients = this.clients.filter(c => c._id !== id) // Remove o cliente da lista local
       } catch (err: any) {
         throw new Error(err.response?.data?.error || 'Erro ao excluir cliente')
+      } finally {
+        this.loading = false
       }
     }
   }

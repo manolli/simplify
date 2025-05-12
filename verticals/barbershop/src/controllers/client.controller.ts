@@ -1,52 +1,70 @@
 import Client from '../models/Client';
 import { AuthRequest } from '../middleware/authJWT';
-import { Request,Response } from 'express';
+import { Response } from 'express';
 
+// Criar novo cliente
 export const createClient = async (req: AuthRequest, res: Response) => {
   try {
-    const { tenantId } = req.user!
-    const client = await Client.create(req.body,{tenantId})
-    res.status(201).json(client)
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar cliente', details: err })
-  }
-}
+    const { tenantId } = req.user!;
+    const clientData = {
+      ...req.body,
+      tenantId, // injeta tenantId a partir do token
+    };
 
-export const getAllClients = async (_: Request, res: Response) => {
-  try {
-    const clients = await Client.find()
-    res.json(clients)
+    const client = await Client.create(clientData);
+    res.status(201).json(client);
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar clientes' })
+    res.status(400).json({ error: 'Erro ao criar cliente', details: err });
   }
-}
+};
 
-export const getClientById = async (req: Request, res: Response) => {
+// Buscar todos os clientes do tenant
+export const getAllClients = async (req: AuthRequest, res: Response) => {
   try {
-    const client = await Client.findById(req.params.id)
-    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' })
-    res.json(client)
+    const { tenantId } = req.user!;
+    const clients = await Client.find({ tenantId }); // filtra pelo tenant
+    res.json(clients);
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar cliente' })
+    res.status(500).json({ error: 'Erro ao buscar clientes' });
   }
-}
+};
 
-export const updateClient = async (req: Request, res: Response) => {
+// Buscar cliente por ID
+export const getClientById = async (req: AuthRequest, res: Response) => {
   try {
-    const client = await Client.findByIdAndUpdate(req.params.id, req.body, { new: true })
-    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' })
-    res.json(client)
+    const { tenantId } = req.user!;
+    const client = await Client.findOne({ _id: req.params.id, tenantId });
+    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
+    res.json(client);
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar cliente' })
+    res.status(500).json({ error: 'Erro ao buscar cliente' });
   }
-}
+};
 
-export const deleteClient = async (req: Request, res: Response) => {
+// Atualizar cliente
+export const updateClient = async (req: AuthRequest, res: Response) => {
   try {
-    const client = await Client.findByIdAndDelete(req.params.id)
-    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' })
-    res.status(204).send()
+    const { tenantId } = req.user!;
+    const client = await Client.findOneAndUpdate(
+      { _id: req.params.id, tenantId },
+      req.body,
+      { new: true }
+    );
+    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
+    res.json(client);
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao excluir cliente' })
+    res.status(400).json({ error: 'Erro ao atualizar cliente' });
   }
-}
+};
+
+// Excluir cliente
+export const deleteClient = async (req: AuthRequest, res: Response) => {
+  try {
+    const { tenantId } = req.user!;
+    const client = await Client.findOneAndDelete({ _id: req.params.id, tenantId });
+    if (!client) return res.status(404).json({ error: 'Cliente não encontrado' });
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao excluir cliente' });
+  }
+};

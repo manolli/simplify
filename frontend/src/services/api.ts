@@ -1,12 +1,14 @@
 import axios from 'axios'
+import { useAuthStore } from '@/store/auth'
 
 const api = axios.create({
-  baseURL: 'http://localhost:4100/v1'
+  baseURL: '/v1'
 })
 
 // Intercepta requisições e insere o token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const auth = useAuthStore()
+  const token = auth.token || localStorage.getItem('token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

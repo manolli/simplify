@@ -5,7 +5,10 @@
       <form @submit.prevent="login">
         <input v-model="email" type="email" placeholder="Email" class="input" />
         <input v-model="password" type="password" placeholder="Senha" class="input mt-3" />
-        <button class="btn w-full mt-5 bg-blue-600 text-white">Entrar</button>
+         <button class="btn w-full mt-5 bg-blue-600 text-white" :disabled="loading">
+          <span v-if="loading">Entrando...</span>
+          <span v-else>Entrar</span>
+        </button>
       </form>
     </div>
   </div>
@@ -14,23 +17,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+//import api from '@/services/api' // <- importante: usar o axios.ts
+import {useAuthStore}  from '@/store/auth' // <- importante: usar o auth.ts
 
 const email = ref('')
 const password = ref('')
+const loading = ref(false)
 const router = useRouter()
+const auth = useAuthStore()
 
 async function login() {
-  const res = await fetch('http://localhost:4000/v1/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.value, password: password.value })
-  })
-  const data = await res.json()
-  if (data.token) {
-    localStorage.setItem('token', data.token)
+  loading.value = true
+  try {
+    await auth.login(email.value, password.value)
     router.push('/dashboard')
-  } else {
-    alert('Login inválido')
+  } catch (err) {
+    alert('Erro ao fazer login');
+    console.error(err);
+  } finally {
+    loading.value = false
   }
 }
 </script>
